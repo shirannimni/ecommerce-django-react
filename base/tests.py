@@ -2,13 +2,15 @@ import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 
 class TestWebApp:
     def setup_method(self):
         # Set the path to the chromedriver executable
         chrome_driver_path = "/path/to/chromedriver"
-        self.driver = webdriver.Chrome(executable_path=chrome_driver_path)
+        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 
     def teardown_method(self):
         self.driver.quit()
