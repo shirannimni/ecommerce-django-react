@@ -1,0 +1,12 @@
+FROM postgres:16.3
+
+ENV POSTGRES_DB=django_db
+ENV POSTGRES_USER=username
+ENV POSTGRES_PASSWORD=password
+COPY ecommerce-django-react/base/migrations /app/
+#COPY migrations /app/
+
+  
+#COPY docker-entrypoint-initdb.d /
+
+EXPOSE 5432
