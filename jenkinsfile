@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -12,16 +13,21 @@ pipeline {
         
         stage('Clone Repository') {
             steps {
-                sh "rm -rf 'ecommerce-django-react'"
-                sh "git clone 'https://github.com/shirannimni/ecommerce-django-react.git'"
-                sh "ls -la"
+                git branch: 'main', url: 'https://github.com/shirannimni/ecommerce-django-react.git'
+                // sh "rm -rf 'ecommerce-django-react'"
+                // sh "git clone 'https://github.com/shirannimni/ecommerce-django-react.git'"
+                // sh "ls -la"
             }
         }
 
         stage('Docker Login') {
             steps {
                 script {
-                    sh '''echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin'''
+                    sh '''
+                    sudo usermod -aG docker jenkins
+                    sudo systemctl restart jenkins
+                    sudo systemctl restart docker
+                    echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin'''
                     
                 }
             }
@@ -31,7 +37,7 @@ pipeline {
         
         stage('Install Dependencies') {
             steps {
-                sh 'pip install -r ecommerce-django-react/requirements.txt'
+                sh 'pip install -r requirements.txt'
             }
         }
         
@@ -44,8 +50,8 @@ pipeline {
                 script {
                     echo ''
                     echo '''${env.DOCKERHUB_REPO}/django-web", "-f docker/web/Dockerfile .'''
-                    docker.build("${env.DOCKERHUB_REPO}/django-web", "-f /home/shirannimni/final_project/Dockerfile.web .")
-                    docker.build("${env.DOCKERHUB_REPO}/django-db", "-f /home/shirannimni/final_project/Dockerfile.db .")
+                    docker.build("${env.DOCKERHUB_REPO}/django-web", "-f /home/shirannimni/ecommerce-django-react/Dockerfile.web .")
+                    docker.build("${env.DOCKERHUB_REPO}/django-db", "-f /home/shirannimni/ecommerce-django-react/Dockerfile.db .")
                 }
             }
         }
@@ -102,7 +108,6 @@ pipeline {
         stage('Verify Communication') {
             steps {
                 script {
-                    // Check if django-web can communicate with django-db
                     sh '''
                     docker network inspect django-network || docker network create django-network
                     docker network connect django-network django-web
@@ -119,18 +124,15 @@ pipeline {
                 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
                 sudo apt install ./google-chrome-stable_current_amd64.deb
                 '''
-                // sh 'base/tests.py'
-                // sh 'python3 -m venv .venv'
-                // sh '. .venv/bin/activate'
-                // sh 'pip install pytest pytest-html-reporter'
-                // sh 'migrations.py'
-                sh 'pip3 install --user selenium pytest pytest-html-reporter webdriver-manager'
-                sh 'pip3 install --upgrade selenium webdriver_manager'
+        
+                sh 'pip3 install --user selenium==3.14159 pytest pytest-html-reporter webdriver-manager'
+                sh 'pip3 install selenium webdriver_manager'
                 sh 'pip3 show selenium'
-                sh 'python3 -m pytest -v /var/lib/jenkins/workspace/final_project/ecommerce-django-react/base/tests.py --html-report=./report.html'
-    
-                // sh 'python3 -m pytest -v final_project/ecmomerce-django-react/base/tests.py --html-report=./report.html'
-                // sh 'python3 -m pytest --html-report=./report.html'
+                sh 'chmod -R 777 /var/lib/jenkins/workspace/ecommerce-django-react'
+                sh 'export PATH=$PATH:~/.local/bin'
+                sh 'python3 -m pytest -v /var/lib/jenkins/workspace/ecommerce-django-react/base/tests.py --html-report=./report.html'
+                
+
     }
 }
 
@@ -184,4 +186,3 @@ pipeline {
         //              #  subject: 'Test Subject',
         //             # to: 'test@example.com'
 
-    
