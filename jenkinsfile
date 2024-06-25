@@ -1,0 +1,187 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_PASSWORD = credentials('docker_password')
+        DOCKERHUB_REPO = 'shirannimni'
+        DOCKERHUB_USERNAME = 'shirannimni'
+        SUCCESS = '0'
+    }
+
+    stages {
+        
+        stage('Clone Repository') {
+            steps {
+                sh "rm -rf 'ecommerce-django-react'"
+                sh "git clone 'https://github.com/shirannimni/ecommerce-django-react.git'"
+                sh "ls -la"
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                script {
+                    sh '''echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin'''
+                    
+                }
+            }
+        }
+        
+        
+        
+        stage('Install Dependencies') {
+            steps {
+                sh 'pip install -r ecommerce-django-react/requirements.txt'
+            }
+        }
+        
+    
+
+    
+        
+        stage('Build Docker Images') {
+            steps {
+                script {
+                    echo ''
+                    echo '''${env.DOCKERHUB_REPO}/django-web", "-f docker/web/Dockerfile .'''
+                    docker.build("${env.DOCKERHUB_REPO}/django-web", "-f /home/shirannimni/final_project/Dockerfile.web .")
+                    docker.build("${env.DOCKERHUB_REPO}/django-db", "-f /home/shirannimni/final_project/Dockerfile.db .")
+                }
+            }
+        }
+        
+        stage('Tag Docker Images') {
+          steps {
+              script {
+                  def buildNumber = env.BUILD_NUMBER
+                  def djangoWebImageTag = "${env.DOCKERHUB_REPO}/django-web:${buildNumber}"
+                  def djangoDBImageTag = "${env.DOCKERHUB_REPO}/django-db:${buildNumber}"
+
+                  sh "docker tag ${env.DOCKERHUB_REPO}/django-web ${djangoWebImageTag}"
+                  sh "docker tag ${env.DOCKERHUB_REPO}/django-db ${djangoDBImageTag}"
+            }
+        }
+    }
+        
+    
+
+        stage('Push Docker Images') {
+            steps {
+                script {
+                    sh "echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin"
+                    def djangoWebImageTag = "${DOCKERHUB_REPO}/django-web:${env.BUILD_NUMBER}"
+                    def djangoDBImageTag = "${DOCKERHUB_REPO}/django-db:${env.BUILD_NUMBER}"
+                    sh "docker push $djangoWebImageTag"
+                    sh "docker push $djangoDBImageTag"
+                }
+            }
+        }
+
+        stage('Run Docker Containers') {
+            steps {
+                script {
+                    sh '''
+                    sudo docker rm -f django-db || true
+                    sudo docker rm -f django-web || true
+
+                    
+                    sudo docker run -d --name django-db \
+                        -p 5432:5432 \
+                        ${DOCKERHUB_REPO}/django-db
+
+                    
+                    sudo docker run -d --name django-web \
+                        -p 5000:5000 \
+                        -e DATABASE_URL=postgres://postgres:example_password@django-db:5432/db_name \
+                        ${DOCKERHUB_REPO}/django-web
+                    '''
+                }
+            }
+        }
+
+        stage('Verify Communication') {
+            steps {
+                script {
+                    // Check if django-web can communicate with django-db
+                    sh '''
+                    docker network inspect django-network || docker network create django-network
+                    docker network connect django-network django-web
+                    docker network connect django-network django-db
+                    docker exec django-web ping -c 4 django-db
+                    '''
+                }
+            }
+        }
+    
+         stage('Run Tests') {
+            steps {
+                sh '''
+                wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+                sudo apt install ./google-chrome-stable_current_amd64.deb
+                '''
+                // sh 'base/tests.py'
+                // sh 'python3 -m venv .venv'
+                // sh '. .venv/bin/activate'
+                // sh 'pip install pytest pytest-html-reporter'
+                // sh 'migrations.py'
+                sh 'pip3 install --user selenium pytest pytest-html-reporter webdriver-manager'
+                sh 'pip3 install --upgrade selenium webdriver_manager'
+                sh 'pip3 show selenium'
+                sh 'python3 -m pytest -v /var/lib/jenkins/workspace/final_project/ecommerce-django-react/base/tests.py --html-report=./report.html'
+    
+                // sh 'python3 -m pytest -v final_project/ecmomerce-django-react/base/tests.py --html-report=./report.html'
+                // sh 'python3 -m pytest --html-report=./report.html'
+    }
+}
+
+        stage('testing') {
+           steps {
+               sh 'pytest'
+           }
+           post {
+               success {
+                   script{
+                   env.SUCCESS = '1'
+                   }
+               }
+               failure {
+                   script{
+                   env.SUCCESS = '0'
+                   }
+               }
+           }
+       }
+        
+        stage('build release'){
+            when {
+                expression {env.SUCCESS == '1' }
+            }
+            steps {
+                sh "'echo 'build a release with docker'"
+            }
+        }
+        
+        stage('creating report'){
+           when {
+                expression {env.SUCCESS == '0' }
+            }
+            steps {
+                sh "'echo 'creating report for the pytest tests'"
+                publishHTML (target : [allowMissing: false, 
+                alwaysLinkToLastBuild: true, 
+                keepAll: true, 
+                reportFiles: './repot.html', 
+                reportName: 'my tests report',  
+                reportTitles: 'the tests report'])
+            }
+        } 
+    }
+    
+}
+    
+                   //   EmailCreateIssue(
+        //              emailext body: 'Test Message',
+        //              #  subject: 'Test Subject',
+        //             # to: 'test@example.com'
+
+    
