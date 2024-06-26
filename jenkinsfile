@@ -49,7 +49,15 @@ pipeline {
             steps {
                 script {
                     echo ''
-                    echo '''${env.DOCKERHUB_REPO}/django-web", "-f docker/web/Dockerfile .'''
+Started by user shiran
+[Pipeline] Start of Pipeline (hide)
+[Pipeline] node
+Running on Jenkins in /var/lib/jenkins/workspace/ci-cd ecommerce-django
+[Pipeline] {
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+ERROR: docker_password                    echo '''${env.DOCKERHUB_REPO}/django-web", "-f docker/web/Dockerfile .'''
                     docker.build("${env.DOCKERHUB_REPO}/django-web", "-f /home/shirannimni/ecommerce-django-react/Dockerfile.web .")
                     docker.build("${env.DOCKERHUB_REPO}/django-db", "-f /home/shirannimni/ecommerce-django-react/Dockerfile.db .")
                 }

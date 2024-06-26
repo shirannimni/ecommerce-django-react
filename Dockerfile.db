@@ -4,7 +4,7 @@ ENV POSTGRES_DB=django_db
 ENV POSTGRES_USER=username
 ENV POSTGRES_PASSWORD=password
 
-COPY /ecommerce-django-react/base/migrations /app/ 
+COPY base/migrations /app/  
 
   
 #COPY docker-entrypoint-initdb.d /
