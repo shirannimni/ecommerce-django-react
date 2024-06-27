@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from webdriver_manager.chrome import ChromeDriverManager
 
 class TestWebApp:
@@ -28,15 +29,18 @@ class TestWebApp:
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), 
                                        options=chrome_options,
                                        desired_capabilities=capabilities)
-        self.driver.set_page_load_timeout(20) 
+        self.driver.set_page_load_timeout(20)
+
 
 
 
         try:
             driver_path = ChromeDriverManager().install()
             print(f"ChromeDriver path: {driver_path}")
-
-            self.driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
+            self.driver = webdriver.Chrome(service=Service(driver_path), 
+                                           options=chrome_options,
+                                           desired_capabilities=capabilities)
+            self.driver.set_page_load_timeout(30) 
         except Exception as e:
            print(f"Error initializing WebDriver: {str(e)}")
            raise
@@ -55,23 +59,42 @@ class TestWebApp:
 
 
     def teardown_method(self):
-        self.driver.quit()
+        #self.driver.quit()
+        if hasattr(self, 'driver'):
+            self.driver.quit()
 
     def test_homepage(self):
+        try:
+            docker_host_ip = os.environ.get('DOCKER_HOST_IP', 'localhost')
+            self.driver.get(f"http://{docker_host_ip}:5000")
 
-        docker_host_ip = os.environ.get('DOCKER_HOST_IP', 'localhost')
-        self.driver.get(f"http://{docker_host_ip}:5000") 
+            # Wait for the page to load
+            wait = WebDriverWait(self.driver, 10)
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "h1")))
 
-        # Navigate to the web application
+            # Assert that the page title is correct
+            assert "ecommerce-django-react" in self.driver.title
+
+            # Assert that the "Welcome" message is present
+            welcome_message = self.driver.find_element(By.CSS_SELECTOR, "h1").text
+            assert "Welcome" in welcome_message
+        except Exception as e:
+            print(f"Error during test: {str(e)}")
+            raise
+
+        #docker_host_ip = os.environ.get('DOCKER_HOST_IP', 'localhost')
+        #self.driver.get(f"http://{docker_host_ip}:5000") 
+
+        
         #self.driver.get("http://localhost:5000")
 
         # Wait for the page to load
-        wait = WebDriverWait(self.driver, 10)
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "h1")))
+        #wait = WebDriverWait(self.driver, 10)
+        #wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "h1")))
 
         # Assert that the page title is correct
-        assert "ecommerce-django-react" in self.driver.title
+        #assert "ecommerce-django-react" in self.driver.title
 
         # Assert that the "Welcome" message is present
-        welcome_message = self.driver.find_element(By.CSS_SELECTOR, "h1").text
-        assert "Welcome" in welcome_message
+        #welcome_message = self.driver.find_element(By.CSS_SELECTOR, "h1").text
+        #assert "Welcome" in welcome_message
