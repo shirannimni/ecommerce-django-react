@@ -14,10 +14,22 @@ class TestWebApp:
         chrome_options.add_argument("--headless")  # Run in headless mode (no GUI)
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--disable-extensions")
+        chrome_options.add_argument("--ignor-certificate-errors")
+        chrome_options.add_argument("--test-type")
 
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-        chrome_driver_path = "/path/to/chromedriver"
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        chrome_options.binary_location = "/opt/google/chrom/chrom"
+
+
+
+
+        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager(version="126.0.6478.126").install()), options=chrome_options)
+        #self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+        #chrome_driver_path = "/path/to/chromedriver"
+        driver_path = ChromeDriverManager().install()
+        self.driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
+        #self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 
     def teardown_method(self):
         self.driver.quit()
