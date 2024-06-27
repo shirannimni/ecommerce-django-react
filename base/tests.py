@@ -22,6 +22,15 @@ class TestWebApp:
         chrome_options.binary_location = "/opt/google/chrome/chrome"
 
         
+        capabilities = DesiredCapabilities.CHROME.copy()
+        capabilities['pageLoadStrategy'] = 'normal'
+        
+        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), 
+                                       options=chrome_options,
+                                       desired_capabilities=capabilities)
+        self.driver.set_page_load_timeout(20) 
+
+
 
         try:
             driver_path = ChromeDriverManager().install()
@@ -49,8 +58,12 @@ class TestWebApp:
         self.driver.quit()
 
     def test_homepage(self):
+
+        docker_host_ip = os.environ.get('DOCKER_HOST_IP', 'localhost')
+        self.driver.get(f"http://{docker_host_ip}:5000") 
+
         # Navigate to the web application
-        self.driver.get("http://localhost:5000")
+        #self.driver.get("http://localhost:5000")
 
         # Wait for the page to load
         wait = WebDriverWait(self.driver, 10)
