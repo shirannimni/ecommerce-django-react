@@ -4,11 +4,18 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 class TestWebApp:
     def setup_method(self):
         # Set the path to the chromedriver executable
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # Run in headless mode (no GUI)
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+
+        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
         chrome_driver_path = "/path/to/chromedriver"
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
 
