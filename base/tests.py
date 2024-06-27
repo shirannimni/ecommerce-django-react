@@ -1,4 +1,5 @@
 import os
+import pytest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -16,35 +17,40 @@ class TestWebApp:
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--disable-extensions")
-        chrome_options.add_argument("--ignor-certificate-errors")
-        chrome_options.add_argument("--test-type")
+        #chrome_options.add_argument("--disable-extensions")
+        #chrome_options.add_argument("--ignor-certificate-errors")
+        #chrome_options.add_argument("--test-type")
+        chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_argument("--remote-debugging-port=9222")
 
-        chrome_options.binary_location = "/opt/google/chrome/chrome"
+        #chrome_options.binary_location = "/opt/google/chrome/chrome"
 
         
-        capabilities = DesiredCapabilities.CHROME.copy()
-        capabilities['pageLoadStrategy'] = 'normal'
+        #capabilities = DesiredCapabilities.CHROME.copy()
+        #capabilities['pageLoadStrategy'] = 'normal'
         
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), 
-                                       options=chrome_options,
-                                       desired_capabilities=capabilities)
-        self.driver.set_page_load_timeout(20)
+        #self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), 
+        #                               options=chrome_options,
+        #                               desired_capabilities=capabilities)
+        #self.driver.set_page_load_timeout(20)
+         
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        request.cls.driver = driver
+        yield
+        driver.quit()
+        
 
-
-
-
-        try:
-            driver_path = ChromeDriverManager().install()
-            print(f"ChromeDriver path: {driver_path}")
-            self.driver = webdriver.Chrome(service=Service(driver_path), 
-                                           options=chrome_options,
-                                           desired_capabilities=capabilities)
-            self.driver.set_page_load_timeout(30) 
-        except Exception as e:
-           print(f"Error initializing WebDriver: {str(e)}")
-           raise
+       # try:
+        #    driver_path = ChromeDriverManager().install()
+         #   print(f"ChromeDriver path: {driver_path}")
+          #  self.driver = webdriver.Chrome(service=Service(driver_path), 
+         #                                  options=chrome_options,
+         #                                  desired_capabilities=capabilities)
+         #   self.driver.set_page_load_timeout(30) 
+        #except Exception as e:
+         #  print(f"Error initializing WebDriver: {str(e)}")
+          # raise
 
 
 
