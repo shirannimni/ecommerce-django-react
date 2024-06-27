@@ -50,7 +50,7 @@ class TestWebApp:
 
     def test_homepage(self):
         # Navigate to the web application
-        self.driver.get("http://localhost:8000")
+        self.driver.get("http://localhost:5000")
 
         # Wait for the page to load
         wait = WebDriverWait(self.driver, 10)
