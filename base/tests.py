@@ -19,6 +19,7 @@ class TestWebApp:
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--ignor-certificate-errors")
         chrome_options.add_argument("--test-type")
+        chrome_options.add_argument("--remote-debugging-port=9222")
 
         chrome_options.binary_location = "/opt/google/chrome/chrome"
 
