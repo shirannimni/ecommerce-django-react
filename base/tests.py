@@ -21,16 +21,16 @@ class TestWebApp:
 
         chrome_options.binary_location = "/opt/google/chrome/chrome"
 
-
-         try:
         
-        driver_path = ChromeDriverManager().install()
-        print(f"ChromeDriver path: {driver_path}")
 
-        self.driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
-      except Exception as e:
-        print(f"Error initializing WebDriver: {str(e)}")
-        raise
+        try:
+            driver_path = ChromeDriverManager().install()
+            print(f"ChromeDriver path: {driver_path}")
+
+            self.driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
+        except Exception as e:
+           print(f"Error initializing WebDriver: {str(e)}")
+           raise
 
 
 
