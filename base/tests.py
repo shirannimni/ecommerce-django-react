@@ -19,17 +19,31 @@ class TestWebApp:
         chrome_options.add_argument("--ignor-certificate-errors")
         chrome_options.add_argument("--test-type")
 
-        chrome_options.binary_location = "/opt/google/chrom/chrom"
+        chrome_options.binary_location = "/opt/google/chrome/chrome"
 
 
-
-
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager(version="126.0.6478.126").install()), options=chrome_options)
-        #self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
-        #chrome_driver_path = "/path/to/chromedriver"
+         try:
+        
         driver_path = ChromeDriverManager().install()
+        print(f"ChromeDriver path: {driver_path}")
+
         self.driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
-        #self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+      except Exception as e:
+        print(f"Error initializing WebDriver: {str(e)}")
+        raise
+
+
+
+
+        #self.driver = webdriver.Chrome(service=Service(ChromeDriverManager(version="126.0.6478.126").install()), options=chrome_options)
+        
+        #driver_path = ChromeDriverManager().install()
+        #self.driver = webdriver.Chrome(service=Service(driver_path), options=chrome_options)
+        
+
+         
+
+
 
     def teardown_method(self):
         self.driver.quit()
