@@ -17,15 +17,15 @@ class TestWebApp:
 
     def test_homepage(self):
         # Navigate to the web application
-        self.driver.get("http://localhost:5000")
+        self.driver.get("http://localhost:8000")
 
         # Wait for the page to load
         wait = WebDriverWait(self.driver, 500)
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "h1")))
         print (self.driver.title)
         # Assert that the page title is correct
-        assert "ecommerce-django-react" in self.driver.title
+        assert "Otaku House - The #1 Anime Merchandise and Cosplay Shop." in self.driver.title
 
         # Assert that the "Welcome" message is present
         welcome_message = self.driver.find_element(By.CSS_SELECTOR, "h1").text
-        assert "Welcome" in welcome_message
+        assert "LATEST PRODUCTS" in welcome_message
