@@ -30,7 +30,7 @@ class TestWebApp:
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "h1")))
         print (self.driver.title)
         # Assert that the page title is correct
-        assert "Otaku House - The #1 Anime Merchandise and Cosplay Sho." in self.driver.title
+        assert "Otaku House - The #1 Anime Merchandise and Cosplay Shop." in self.driver.title
 
         # Assert that the "Welcome" message is present
         welcome_message = self.driver.find_element(By.CSS_SELECTOR, "h1").text
